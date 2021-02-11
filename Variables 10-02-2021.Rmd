@@ -1,0 +1,91 @@
+--
+title: "Gráficas de variables"
+output: html_notebook
+---
+
+Buscando programas en librerí
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+Ahora abrir las bases de datos. 
+Recordar estar en brechgenero para que corra dicx_ile
+
+```{r}
+ile <- curso.feminismo.datos::ile_data
+dicx_ile <- read.csv("diccionario-de-datos-ile.csv")
+View(dicx_ile)
+```
+
+Variables que voy a ocupar. 
+
+```{r}
+#demograficas
+edocivil_descripcion #puente#
+edad
+nivel_edu
+ocupacion
+#reproductivos
+nhijos
+anticonceptivo
+```
+
+GRÁFICA DE EDAD
+Título "Edad de mujeres que obtaron por una ILE, 2021"
+Divida en una secuencia de 10*10
+```{r}
+ile %>%
+  drop_na(edad) %>% 
+  ggplot(aes(x = edad)) + 
+  geom_histogram(aes(y =..density..), breaks = seq(10, 55, by = 1), 
+                 color = "#88398A", fill = "#88398A", alpha = 0.8) +
+  geom_density(alpha = 0.5, color = "#D3D3D3", fill = "#D3D3D3") +
+  geom_vline(aes(xintercept = mean(edad)), color = "#D3D3D3",
+             linetype = "dashed", size = 1) +
+  labs(title = "Edad de mujeres que optaron por una ILE, 2016-2020", x= "Edad", y = "Density") +
+  theme_classic()
+```
+
+######GRÁFICA DE NIVEL EDUCATIVO#############
+con este comando abreviaré el nombre de las variables. 
+No olvidar -- No dejar espacios en los nombres que están dentro de las comillas.
+En la consola ver unique(ile$nivel_edu2) de esta forma ovy a ver si las varriables en efecto se convietieron. 
+***Desde aquí está el error en NA Porque no se convierte a "no constest".
+```{r}
+ile <- ile %>% 
+ mutate(nivel_edu2 = case_when(
+    nivel_edu == "LICENCIATURA" ~ "superior",
+    nivel_edu == "PREPARATORIA" ~ "media superior",
+    nivel_edu == "SECUNDARIA" ~ "b?sica", 
+    nivel_edu == "PRIMARIA" ~ "b?sica",
+    nivel_edu == "MAESTRIA" ~ "superior", 
+    nivel_edu== "DOCTORADO" ~ "superior", 
+    nivel_edu== "SIN ACCESO A LA EDUCACION FORMAL" ~ "ninguna"
+    )) 
+```
+
+Sacar el porcentaje aparte porque es una variable escrita en texto. 
+Es nivel_edu2 porque el nombre de las variables ya están abreviadas. 
+
+```{r}
+ile %>% 
+  select(nivel_edu2) %>% 
+   count(nivel_edu2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_edu
+```
+Plot con gráficos iluminanos de forma manual. 
+OJO -- Aquí seleccioné un color para "no contes" o NA
+```{r}
+ggplot(ile_edu, aes(nivel_edu2, perc, fill = nivel_edu2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("b?sica" = "#cb997e",
+                               "media superior" = "#ddbea9",
+                               "superior" = "#ffe8d6",
+                               "ninguna" = "#b7b7a4",
+                               "NA" = "#a5a58d")) +
+  ylab("relative frequencies") + labs(title = "Porcentaje de nivel educativo en mujeres usuarias de ILE") +
+  theme_classic() 
+```
