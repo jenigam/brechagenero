@@ -1,0 +1,179 @@
+---
+title: 'Modificación 11 febrero 2021'
+output:
+  word_document: default
+  Word_document: default
+---
+Grafíca Ocupación con colores y bonita.
+
+```{r}
+
+ile <- ile %>% 
+  mutate(ocupacion2 = case_when(
+    ocupacion == "TRABAJADORA DEL HOGAR NO REMUNERADA" ~ "Hogar",
+    ocupacion == "EMPLEADA" ~ "Empleada",
+    ocupacion == "ESTUDIANTE" ~ "Estudiante", 
+    ocupacion == "DESEMPLEADA" ~ "Desempleada",
+    ocupacion == "NO ESPECIFICADO" ~ "no especificado", 
+    ocupacion == "<NA>" ~ "ninguna"
+    ))
+
+ile %>% 
+  select(ocupacion2) %>% 
+   count(ocupacion2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_ocup
+
+ggplot(ile_ocup, aes(reorder(ocupacion2, - perc), perc, fill = ocupacion2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("Hogar" = "#3AB795",
+                               "Empleada" = "#A0E8AF",
+                               "Estudiante" = "#EDEAD0",
+                               "Desempleada" = "#8ce39f",
+                               "no especificado" = "#86BAA1"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("ocupación") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Nivel educativo" ,
+       subtitle = "Usuarias de ILE 2016-2020")+
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+Gráfica estado civil con colores y bonita. 
+
+```{r}
+ile <- ile %>% 
+  mutate(edocivil_descripcion2 = case_when(
+    edocivil_descripcion == "SOLTERA" ~ "soltera",
+    edocivil_descripcion == "VIUDA" ~ "separada",
+    edocivil_descripcion == "UNION LIBRE" ~ "u libre", 
+    edocivil_descripcion == "CASADA" ~ "casada",
+    edocivil_descripcion == "SEPARADA" ~ "separada", 
+    edocivil_descripcion== "DIVORCIADA" ~ "separada", 
+    edocivil_descripcion== "<NA>" ~ "ninguna"
+    ))
+ile %>% 
+  select(edocivil_descripcion2) %>% 
+   count(edocivil_descripcion2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_edocivil
+
+ggplot(ile_edocivil, aes(reorder(edocivil_descripcion2, - perc), perc, fill= edocivil_descripcion2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("soltera" = "#3AB795",
+                               "separada" = "#A0E8AF",
+                               "u libre" = "#EDEAD0",
+                               "casada" = "#8ce39f",
+                               "ninguna" = "#86BAA1"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("Estado civil") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Estado civil" ,
+       subtitle = "Usuarias de ILE 2016-2020")+
+  theme_minimal() + coord_flip() +
+  theme(legend.position = "none")
+
+```
+
+Gráfica métodos anticonceptivos con colores y bonita. 
+
+```{r}
+ile <- ile %>% 
+ mutate(anticonceptivo2 = case_when(
+    anticonceptivo == "NINGUNO" ~ "ninguno",
+    anticonceptivo == "DIU" ~ "DIU",
+    anticonceptivo == "PASTILLA ANTICONCEPTIVA" ~ "Pastillas", 
+    anticonceptivo == "PARCHES" ~ "Parche",
+    anticonceptivo == "PASTILLA DE EMERGENCIA" ~ "PAE", 
+    anticonceptivo == "IMPLANTE SUBDERMICO" ~ "Implante", 
+    anticonceptivo == "CONDON" ~ "condón",
+    anticonceptivo == "LIGADURA DE TROMPAS" ~ "OBT",
+    anticonceptivo == "CONDON + DIU" ~ "combinado barrera",
+    anticonceptivo == "INYECCION + LIGADURA DE TROMPAS" ~ "combinado hormonal",
+    anticonceptivo == "ANILLO VAGINAL" ~ "anillo",
+    anticonceptivo == "CONDON + IMPLANTE" ~ "combinado barrera",
+    anticonceptivo == "VASECTOMIA" ~ "vasectomía",
+    anticonceptivo == "CONDON + PASTILLA ANTICONCEPTIVA" ~ "combinado barrera",
+    anticonceptivo == "CONDON + INYECCION" ~ "combinado barrera",
+    anticonceptivo == "INYECCION + DIU" ~ "combinado hormonal",
+    anticonceptivo == "CONDON + PARCHE" ~ "combinado barrera",
+    anticonceptivo == "PASTILLA DE EMERGENCIA + INYECCION" ~ "combinado hormonal",
+    anticonceptivo == "PASTILLA DE EMERGENCIA + PARCHES" ~ "combinado hormonal",
+    anticonceptivo == "<NA>" ~ "no contesto")) 
+
+ile %>% 
+  select(anticonceptivo2) %>% 
+   count(anticonceptivo2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_antic2
+
+ggplot(ile_antic2, aes(reorder(anticonceptivo2, - perc), perc, fill = anticonceptivo2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("ninguno" = "#3AB795",
+                               "DIU" = "#A0E8AF",
+                               "Pastillas" = "#EDEAD0",
+                               "Parche" = "#8ce39f",
+                               "PAE" = "#86BAA1",
+                               "Implante" = "#45C4A2" ,
+                               "condón" = "#97C3AE" ,
+                               "OBT" = "#97C3AE" ,
+                               "combinado barrera" = "#FFDC85" ,
+                               "combinado hormonal" = "#54C9AA" ,
+                               "anillo" = "#9CE7AD" ,
+                               "vasectomía" = "#a4cbb8"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("Método") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Métodos anticonceptivos" ,
+       subtitle = "Mujeres usuarias de ILE 2016-2020")+
+  theme_classic() 
+
+```
+
+Gráfica Métodos Anticonceptivos 2
+
+```{r}
+ile <- ile %>% 
+ mutate(anticonceptivo2 = case_when(
+    anticonceptivo == "NINGUNO" ~ "ninguno",
+    anticonceptivo == "DIU" ~ "barrera",
+    anticonceptivo == "PASTILLA ANTICONCEPTIVA" ~ "hormonal", 
+    anticonceptivo == "PARCHES" ~ "hormonal",
+    anticonceptivo == "PASTILLA DE EMERGENCIA" ~ "hormonal", 
+    anticonceptivo == "IMPLANTE SUBDERMICO" ~ "hormonal", 
+    anticonceptivo == "CONDON" ~ "barrera",
+    anticonceptivo == "LIGADURA DE TROMPAS" ~ "permanente",
+    anticonceptivo == "CONDON + DIU" ~ "combinado",
+    anticonceptivo == "INYECCION + LIGADURA DE TROMPAS" ~ "combinado",
+    anticonceptivo == "ANILLO VAGINAL" ~ "hormonal",
+    anticonceptivo == "CONDON + IMPLANTE" ~ "combinado",
+    anticonceptivo == "VASECTOMIA" ~ "permanente",
+    anticonceptivo == "CONDON + PASTILLA ANTICONCEPTIVA" ~ "combinado",
+    anticonceptivo == "CONDON + INYECCION" ~ "combinado",
+    anticonceptivo == "INYECCION + DIU" ~ "combinado",
+    anticonceptivo == "CONDON + PARCHE" ~ "combinado",
+    anticonceptivo == "PASTILLA DE EMERGENCIA + INYECCION" ~ "combinado",
+    anticonceptivo == "PASTILLA DE EMERGENCIA + PARCHES" ~ "combinado",
+    anticonceptivo == "<NA>" ~ "no contesto")) 
+
+ile %>% 
+  select(anticonceptivo2) %>% 
+   count(anticonceptivo2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_antic3
+
+ggplot(ile_antic3, aes(anticonceptivo2, perc, fill = anticonceptivo2), reorder(anticonceptivo2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("ninguno" = "#3AB795",
+                               "barrera" = "#A0E8AF",
+                               "hormonal" = "#EDEAD0",
+                               "permanente" = "#8ce39f",
+                               "combinado" = "#2C8C72"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("Tipo de método") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Métodos anticonceptivos" ,
+       subtitle = "Mujeres usuarias de ILE 2016-2020")+
+  theme_classic()  
+
+
+```
+
+
