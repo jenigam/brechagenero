@@ -1,0 +1,220 @@
+---
+title: "Datos y posibles barreras contextuales de mujeres que acuden al servicio de Interrupción Legal del Embarazo CDMX 2016 – 2020"
+
+author: "Jennifer Lily Gamoneda Martínez"
+date: "8/3/2021"
+output: html_document
+
+---
+
+En la Ciudad de México la interrupción del embarazo es legal hasta las 12 semanas de gestación, se realiza de forma segura y confidencial, independientemente de las razones por las cuales se requiera este servicio (ANDAR, 2020). Se estima que desde su legalización se han atendido aproximadamente a 213 mil 350 usuarias en esta entidad (CONAMED, 2019).
+
+En esta sitio podrás ver algunos datos obtenidos a partir de la base de datos liberada por la Secretaría de Salud en 2019, que tiene una muestra de 76 734 registros de mujeres que interrumpieron su embarazo de 2016 a 2020. A través de los siguientes gráficos sobre algunos datos sociodemográficos, surge el interés de problematizar las barreras contextuales que enfrentan estas mujeres respecto a su salud sexual y reproductiva. 
+
+```{r setup, include=FALSE}
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+ile <- curso.feminismo.datos::ile_data
+dicx_ile <- read.csv("diccionario-de-datos-ile.csv")
+
+```
+
+
+*Gráfico 1. Edad*
+
+Existe una mayor densidad de mujeres  jóvenes entre 19 y 26 años, las personas que acuden a este servicio son mujeres que tienen una edad mínima de 10 años donde comienza a incrementar el número de usuarias, llegando al punto más alto a los 23 y 24 años, después comienza a disminuir hasta los 50 o más años. 
+
+```{r pressure, echo=FALSE}
+ile %>%
+  drop_na(edad) %>% 
+  ggplot(aes(x = edad)) + 
+  geom_histogram(aes(y =..density..), breaks = seq(10, 55, by = 1), 
+                 color = "#86BAA1", fill = "#86BAA1", alpha = 0.8) +
+  geom_density(alpha = 0.5, color = "#86BAA1", fill = "#86BAA1") +
+  geom_vline(aes(xintercept = mean(edad)), color = "#86BAA1",
+             linetype = "dashed", size = 1) +
+  labs(title = "Edad de mujeres que optaron por una ILE, 2016-2020", x= "Edad", y = "Densidad", 
+       subtitle = "Usuarias de ILE 2016-2020") +
+  theme_classic()
+   theme(legend.position = "none")
+   
+```
+ 
+ 
+*Gráfico 2. Nivel educativo*
+
+El nivel educativo más frecuente que reportan las usuarias es el nivel medio superior (41%), seguido por educación básica (34%), educación superior (17%), ninguna (3%). En un 7% no hay registro del nivel educativo de las usuarias. 
+
+```{r  echo=FALSE}
+ile <- ile %>% 
+ mutate(nivel_edu2 = case_when(
+    nivel_edu == "LICENCIATURA" ~ "superior",
+    nivel_edu == "PREPARATORIA" ~ "media superior",
+    nivel_edu == "SECUNDARIA" ~ "básica", 
+    nivel_edu == "PRIMARIA" ~ "básica",
+    nivel_edu == "MAESTRIA" ~ "superior", 
+    nivel_edu== "DOCTORADO" ~ "superior", 
+    nivel_edu== "SIN ACCESO A LA EDUCACION FORMAL" ~ "ninguna"
+    )) 
+ile %>% 
+  select(nivel_edu2) %>% 
+   count(nivel_edu2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_edu
+
+ggplot(ile_edu, aes(nivel_edu2, perc, fill = nivel_edu2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("básica" = "#3AB795",
+                               "media superior" = "#A0E8AF",
+                               "superior" = "#EDEAD0",
+                               "ninguna" = "#86BAA1"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("Nivel educativo") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Nivel educativo" ,
+       subtitle = "Usuarias de ILE 2016-2020")+
+  theme_minimal() + coord_flip() +
+  theme(legend.position = "none")
+```
+  
+
+*Gráfico. 3 Ocupación*
+
+Por otro lado, se observa que el 33% de las mujeres que acudieron a la ILE son empleadas, 25% son estudiantes, 23% se dedican al hogar y nuevamente se puede observar que en un 14% no hay registro (NA) sobre la ocupación de las usuarias y este porcentaje es mayor comparado con las mujeres desempleadas y aquellas que no especificaron a que se dedican.
+
+```{r  echo=FALSE}
+ile <- ile %>% 
+  mutate(ocupacion2 = case_when(
+    ocupacion == "TRABAJADORA DEL HOGAR NO REMUNERADA" ~ "Hogar",
+    ocupacion == "EMPLEADA" ~ "Empleada",
+    ocupacion == "ESTUDIANTE" ~ "Estudiante", 
+    ocupacion == "DESEMPLEADA" ~ "Desempleada",
+    ocupacion == "NO ESPECIFICADO" ~ "no especificado", 
+    ocupacion == "<NA>" ~ "ninguna"
+    ))
+
+ile %>% 
+  select(ocupacion2) %>% 
+   count(ocupacion2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_ocup
+
+ggplot(ile_ocup, aes(reorder(ocupacion2, - perc), perc, fill = ocupacion2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("Hogar" = "#3AB795",
+                               "Empleada" = "#A0E8AF",
+                               "Estudiante" = "#EDEAD0",
+                               "Desempleada" = "#8ce39f",
+                               "no especificado" = "#86BAA1"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("ocupación") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Ocupación" ,
+       subtitle = "Usuarias de ILE 2016-2020")+
+  theme_minimal() + coord_flip() +
+  theme(legend.position = "none")
+
+```
+
+
+*Gráfico 4. Estado civil* 
+
+Por otra parte, el 47% de las usuarias es soltera, 24% convive con su pareja en unión libre, 10% está casada, 5% es separada y en menor porcentaje no hay registro de su estado civil. 
+
+```{r  echo=FALSE}
+ile <- ile %>% 
+  mutate(edocivil_descripcion2 = case_when(
+    edocivil_descripcion == "SOLTERA" ~ "soltera",
+    edocivil_descripcion == "VIUDA" ~ "separada",
+    edocivil_descripcion == "UNION LIBRE" ~ "u libre", 
+    edocivil_descripcion == "CASADA" ~ "casada",
+    edocivil_descripcion == "SEPARADA" ~ "separada", 
+    edocivil_descripcion == "DIVORCIADA" ~ "separada", 
+    edocivil_descripcion == "<NA>" ~ "ninguna"
+    ))
+ile %>% 
+  select(edocivil_descripcion2) %>% 
+   count(edocivil_descripcion2) %>% 
+  mutate(perc = n / nrow(ile)) -> ile_edocivil
+
+ggplot(ile_edocivil, aes(reorder(edocivil_descripcion2, - perc), perc, fill= edocivil_descripcion2)) +
+  geom_col() + 
+  scale_fill_manual(values = c("soltera" = "#3AB795",
+                               "separada" = "#A0E8AF",
+                               "u libre" = "#EDEAD0",
+                               "casada" = "#8ce39f",
+                               "ninguna" = "#86BAA1"),
+                               na.value = "#214F4B") +
+  scale_x_discrete("Estado civil") +     # configuración eje X (etiqueta del eje)
+  scale_y_continuous("Porcentaje",labels=scales::percent) +
+  labs(title = "Estado civil" ,
+       subtitle = "Usuarias de ILE 2016-2020")+
+  theme_minimal() + coord_flip() +
+  theme(legend.position = "none")
+
+```
+
+### Interpretación 
+
+La edad mediana de las mujeres coincide con otros estudios realizados en la Ciudad de México y en otros países (Sedgh, Bankole, Singh, y Eilers, 2013; Bernal-Becerril, Hernández-Ruiz, Mercader-Arroyo, Guerrero-Labastida, y Ponce-Gómez, 2010; CONAMED, 2019), sin embargo, a pesar de la densidad en edades jóvenes la ILE es un servicio obstétrico que se puede requerir a cualquier edad. Iniciando con aquellas que están entrando a la adolescencia (OMS, 2015) y que no se esperaría que requieran de este servicio, considerando que la edad promedio de inicio de vida sexual es a los 17 años (ENADID, 2018). Sin embargo, el Código Penal Federal, permite la interrupción legal del embarazo en todo el país por causal violación (art.333). 
+
+
+Aunado a esto, la Comisión Económica Para América Latina y el Caribe (2007) señala que las mujeres adolescentes son un grupo de mayor vulnerabilidad, ya que se espera que sean madres jóvenes, las cuales en ocasiones deben abandonar sus estudios (y no poder continuarlos), viven la necesidad de buscar un empleo y pueden enfrentar el abandono de su pareja. 
+
+De acuerdo con los datos obtenidos, las mujeres registradas en el servicio de ILE, son mujeres que se encuentran trabajando o estudiando y tienen una educación media superior. De acuerdo con los datos obtenidos, las mujeres registradas en el servicio de ILE, son mujeres que se encuentran trabajando o estudiando y tienen una educación media superior. Estos hallazgos, plantean una serie de problemáticas que deben ser abordadas a mayor profundidad, como indagar si está correlacionado el nivel educativo y el comportamiento anticonceptivo, ya que se espera que por derecho en la educación básica y media superior reciban información sobre educación sexual integral, abordando temáticas sobre asertividad sexual para evitar conductas sexuales no deseadas y tener relaciones sexuales seguras y consensuadas con sus parejas formales o informales (Santos-Iglesias y Sierra, 2010). 
+ 
+Así como también, se debe indagar el comportamiento anticonceptivo dentro de las relaciones de pareja ya que la responsabilidad para prevenir un embarazo es tarea de mujeres y hombres, sin embargo, en estudios realizados en América Latina se ha encontrado que los hombres suelen relegar esta responsabilidad ya que lo consideran “un tema de mujeres” (Bonino, 2002); la prevención de un embarazo y el acompañamiento en la decisión de abortar depende del vínculo que mantiene el hombre con su pareja ya que cuando se tiene una relación formal o la aman mucho suele existir mayor responsabilidad a diferencia de aquellas con quienes no tienen una relación formal o no las aman (Lerner y Guillaume, 2008). Finalmente, de acuerdo con Clark, Allen, Goyal, Raker y Gottlieb (2014). es más probable que las mujeres que no tienen pareja o no saben el estado de su relación sufran coerción reproductiva.  
+
+Por lo tanto, se puede hipotetizar que las mujeres pueden presentar barreras para tener una educación sexual integral, que brinde información para prevenir un embarazo no esperado, prevenir el abuso sexual y reforzar habilidades para la asertividad sexual en las relaciones sexuales.   Así como también, debe existir un compromiso institucional para que los varones también se involucren en la prevención de conductas sexuales de riesgo, eliminen la violencia hacia las mujeres. 
+
+    Nota: 
+    Se esperaría que las bases de datos libres tuvieran registros completos,
+    sin una gran cantidad de no registros (NA), ya que la información pérdida 
+    resulta valiosa para a partir de ella analizar las situaciones, generar
+    nuevos estudios y proponer soluciones. 
+
+# ¿Te interesan los temas de salud sexual y reproductiva? 
+## Sigue a Resginfícame Esta!
+### ¡Contáctanos!
+
+Facebook:  Resignifícame Esta. | Facebook
+https://www.facebook.com/resignificame
+
+Instagram:  Resignifícame ¡Esta! (@resignificameesta) • Fotos y videos de Instagram
+https://www.instagram.com/resignificameesta/
+
+Twitter: Resignificame ¡Esta! (@resignificame) / Twitter
+https://twitter.com/resignificame
+
+
+**Referencias** 
+
+Alianza Nacional por el Derecho a Decidir. (2020, 9 octubre). El aborto es legal en México     -¡La ley te protege! Andar.org. https://andar.org.mx/aborto-legal/#CIUDADDEMEXICO
+
+Bernal-Becerril, M. L., Hernández-Ruiz, Y. Y., Mercader-Arroyo, M. F., Guerrero-Labastida,     A. T., & Ponce-Gómez, G. (2010). Caracterización de la población usuaria que ingresa      al programa interrupción legal del embarazo en un hospital del sector salud del D.F.      Enfermería universitaria, 7(1), 8-15. 
+
+Bonino, L. (2002) Masculinidad, salud y sistema sanitario en “Seminario sobre                 Mainstreaming de género en las políticas de salud en Europa”. Instituto de la             mujer-España/OMS, y actualizado en Ruiz Jarabo C. y Blanco, P (Comp) (2004) La            violencia  contra las mujeres. Prevención y detección. Madrid: Diaz de Santos.
+
+Clark, L., Allen, R., Goyal, V., Raker, C., & Gottlieb, A. (2014). Reproductive coercion      and co-occurring intimate partner violence in obstetrics and gynecology patients.         American Journal of Obstetrics & Gynecology, 210(1). 
+
+Código Penal Federal [CPF]. (2020, 20 octubre) Título Decimonoveno - Delitos contra la        Vida y la Integridad Corporal. Capítulo VI - Aborto. Art.333. DOF 01-027-2020
+
+Comisión Económica Para América Latina y el Caribe [CEPAL]. (2007). Maternidad adolescente     en América Latina y el Caribe Tendencias, problemas y desafíos. Desafíos Boletín de la     infancia y adolescencia sobre el avance de los objetivos de desarrollo del Milenio, 4,     5-11.
+
+Comisión Nacional de Arbitraje Médico [CONAMED]. (2019, agosto). Boletín CONAMED Órgano de     difusión del Centro Colaborador en Materia de Calidad de la Atención Médica y             Seguridad del Paciente (No 25).
+
+Encuesta Nacional de la Dinámica Demográfica [ENADID] (2018) Principales resultados. INEGI     Consultado el 21 de agosto de 2020.
+
+Lerner, S., y Guillaume, A. (2008). La participación de los varones en la práctica del        aborto. Revista Latinoamericana de Población, 1(2), 29-45.
+
+Organización Mundial de Salud. (2015, 1 diciembre). Desarrollo en la adolescencia.            Organización Mundial de la Salud.
+    https://www.who.int/maternal_child_adolescent/topics/adolescence/dev/es/
+
+Santos-Iglesias, P., & Sierra, J. (2010). El papel de la asertividad sexual en la             sexualidad humana: una revisión sistemática1. International Journal of Clinical and       Health Psychology, 10(3).
+
+Sedgh, G., Bankole, A., Singh, S., & Eilers, M. (2013). Legal Abortion Levels and Trends      By Woman’s Age at Termination. Perspectives on Sexual and Reproductive Health, 45(1),     13-22. 
+
+Secretaría de Salud. (2020). Interrupción Legal del Embarazo (ILE). Secretarí¬a de Salud      de la Ciudad de México. https://www.salud.cdmx.gob.mx/servicios/servicio/ILE
+
+
